@@ -1,0 +1,22 @@
+[ave_waittime1,throughput1]=constP(1/2);
+%[ave_waittime2,throughput2]=constP(1/2);
+% [ave_waittime3,throughput3]=constP(1/4);
+[ave_waittime4,throughput4]=variableP;
+
+x=1:50;
+subplot(1,2,1);
+%plot(x,ave_waittime1,'r',x,ave_waittime2,'g',x,ave_waittime3,'y',x,ave_waittime4,'k');
+%plot(x,ave_waittime1,'r',x,ave_waittime3,'g',x,ave_waittime4,'k');
+plot(x,ave_waittime1,'r',x,ave_waittime4,'k');
+title('平均等待时间随到达率变化图');
+xlabel('到达率');
+ylabel('平均等待时间');
+legend('p=1','可调整p',2);
+subplot(1,2,2);
+%plot(x,throughput1,'r',x,throughput2,'g',x,throughput3,'y',x,throughput4,'k');
+%plot(x,throughput1,'r',x,throughput3,'g',x,throughput4,'k');
+plot(x,throughput1,'r',x,throughput4,'k');
+title('吞吐率随到达率变化图');
+xlabel('到达率');
+ylabel('吞吐率');
+legend('p=1','可调整p',1);
