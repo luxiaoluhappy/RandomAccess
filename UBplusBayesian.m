@@ -4,7 +4,7 @@ function [ave_waittime,throughput,drop_rate] = UBplusBayesian(  )
  %WINDOW_SIZE=8;
  MAX_RETRANS=5;
  
-for round=1:30
+for round=1:20
     ARR_RATE=1*round; 
     NEW_ARR=poissrnd(ARR_RATE,1,NUM_SLOT);
     

@@ -1,13 +1,13 @@
-% function [ave_waittime,throughput,drop_rate] = DynamicWindowsandRACH(  ) 
+ function [ave_waittime,throughput,drop_rate] = DynamicWindowsandRACH(  ) 
 
  NUM_SLOT=1000; 
  %WINDOW_SIZE=8;
  MAX_RETRANS=5;
  
-for round=1:30
-%      round=23;
+for round=1:20
     NUM_PRE=ones(1,NUM_SLOT+1);
     NUM_PRE(1)=64;
+%     NUM_PR=128;
     ARR_RATE=1*round; 
     NEW_ARR=poissrnd(ARR_RATE,1,NUM_SLOT);
     
@@ -28,7 +28,7 @@ for round=1:30
     L=ones(1,NUM_SLOT+1);
     L(1)=6400;
     %系统的目标冲突概率
-    P_TARGET=0.05;
+    P_TARGET=0.6;
 %     WAITTIME=zeros(1,20000);
 %     WINDOW=THRE_L*ones(1,20000);
 %     WAITTIME_LIST=zeros(1,20000);
@@ -65,10 +65,12 @@ for round=1:30
         
         ALLO_CHANNEL=zeros(1,num);
         ALLO_CHANNEL=randi([1,NUM_PRE(slot)],1,num);
+%         ALLO_CHANNEL=randi([1,NUM_PR],1,num);
         
         count=0;
         IND=zeros(1,100);
-        for i=1:NUM_PRE(slot)
+         for i=1:NUM_PRE(slot)
+% for i=1:NUM_PR
             INDEX=find(ALLO_CHANNEL==i);
             %在接入成功的情况下，取出等待时间，用户个数更新，成功个数更新
             if length(INDEX)==1
@@ -110,22 +112,28 @@ for round=1:30
             
         end
         %根据这个slot的情况，动态调整物理资源
-        P_COLLISION=UNSUCCESS_RA_COUNTER/TOTAL_RA_COUNTER;
-        if P_COLLISION<P_TARGET
-            L(slot+1)=L(slot);
+        P_COLLISION(slot)=UNSUCCESS_RA_COUNTER/TOTAL_RA_COUNTER;
+        P_C=sum(P_COLLISION(max(1,slot-20):slot))/min(slot,20);
+        
+        if P_C<P_TARGET
+            NUM_PRE(slot+1)=NUM_PRE(slot);
         else
-              RA_ATTEMPTS(slot)=-log(1-P_COLLISION)*L(slot);
-              L(slot+1)=min(-RA_ATTEMPTS(slot)/log(1-P_TARGET),51200);
-              NUM_PRE(slot+1)=max(ceil(L(slot+1)/100),64);
+%               RA_ATTEMPTS(slot)=-log(1-P_COLLISION(slot))*L(slot);
+%               L(slot+1)=min(-RA_ATTEMPTS(slot)/log(1-P_TARGET),12800);
+%               NUM_PRE(slot+1)=max(ceil(L(slot+1)/100),64);
+           NUM_PRE(slot+1)=min(2*NUM_PRE(slot),128);
         end
+        
          %根据这个slot的情况，估计用户数并动态调整窗口大小     
         if HOLE+SUCCESS==0
-            lambda_est(slot+1)=NUM_PRE(slot)/2.718;
+             lambda_est(slot+1)=NUM_PRE(slot)/2.718;
+%             lambda_est(slot+1)=NUM_PR/2.718;
         else
             lambda_est(slot+1)=0.9*lambda_est(slot)+0.1*SUCCESS;
         end
         B(slot+1)=max(0,B(slot)+COLLISION/0.718-(HOLE+SUCCESS))+lambda_est(slot+1);
         U(slot+1)=ceil(0.2*U(slot)+0.8*B(slot+1)/NUM_PRE(slot));
+%         U(slot+1)=ceil(0.2*U(slot)+0.8*B(slot+1)/NUM_PR);
         %将这个slot中成功的用户提出列表
         IND=sort(IND,'descend');    
         for k=1:count
@@ -147,24 +155,24 @@ drop_rate(round)=NUM_DROP/NUM_SLOT;
 % ave_waittime=(sum(WAITTIME)+sum(WAITTIME_LIST))/(NUM_SUCCESS+USERS+NUM_DROP);
 % throughput=NUM_SUCCESS/NUM_SLOT;
 % drop_rate=NUM_DROP/NUM_SLOT;
-   end
-x=1:30;
-subplot(2,2,1);
-plot(x,ave_waittime);
-title('平均等待时间随到达率变化图');
-xlabel('到达率');
-ylabel('平均等待时间');
-
-subplot(2,2,2);
-plot(x,throughput);
-title('吞吐率随到达率变化图');
-xlabel('到达率');
-ylabel('吞吐率');
-
-subplot(2,2,3);
-plot(x,drop_rate);
-title('丢包率随到达率变化图');
-xlabel('到达率');
-ylabel('丢包率');
+end
+% x=1:20;
+% subplot(2,2,1);
+% plot(x,ave_waittime);
+% title('平均等待时间随到达率变化图');
+% xlabel('到达率');
+% ylabel('平均等待时间');
+% 
+% subplot(2,2,2);
+% plot(x,throughput);
+% title('吞吐率随到达率变化图');
+% xlabel('到达率');
+% ylabel('吞吐率');
+% 
+% subplot(2,2,3);
+% plot(x,drop_rate);
+% title('丢包率随到达率变化图');
+% xlabel('到达率');
+% ylabel('丢包率');
 
 

@@ -1,7 +1,7 @@
-function [ave_waittime,throughput] = variableP(  )
+function [ave_waittime,throughput] = variableP_noDrop(  )
     NUM_PRE=64;
     NUM_SLOT=1000; 
-for round=1:30
+for round=1:20
     ARR_RATE=1*round; 
     NEW_ARR=poissrnd(ARR_RATE,1,NUM_SLOT);
     NUM_SUCCESS=0;
